@@ -46,4 +46,3 @@ container_firewall_ports:
   - 3000/tcp
 
   # --memory="{{ container_memory }}"
-

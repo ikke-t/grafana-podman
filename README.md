@@ -13,7 +13,7 @@ You need to have ansible, and target system having systemd and podman capabiliti
 Role Variables
 --------------
 
-See the defaults.yml
+See the defaults.yml and an example in tests/test.yml and tests/test_vars.yml
 
 * grafana_domain: Grafana's domain config option
 * grafana_root_url: Grafana's root_url config option, e.g. ```http://%(domain)s/```,
