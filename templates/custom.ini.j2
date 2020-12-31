@@ -1,0 +1,16 @@
+[server]     
+domain = {{ grafana_domain }}
+root_url = {{ grafana_root_url }}
+
+[security]
+# default admin user, created on startup
+admin_user = {{ grafana_admin }}
+# default admin password, can be changed before first start of grafana,  or in profile settings
+admin_password = {{ grafana_admin_default_password }}
+
+[smtp]
+enabled = {{ grafana_smtp_enabled }}
+host = {{ grafana_smtp_host }}
+from_address = {{ grafana_smtp_from_address }}
+from_name = {{ grafana_smtp_from_name }}
+

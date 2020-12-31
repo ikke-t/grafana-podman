@@ -1,0 +1,33 @@
+---
+
+grafana_admins:
+  - login: test-admin
+    name: 'Test Admin'
+    email: 'test.admin@localhost.localdomain'
+    password: 'test'
+
+grafana_users:
+  - login: test-user
+    name: 'Test User'
+    email: 'test.user@localhost.localdomain'
+    password: 'test'
+
+# grafana_datasources:
+#   - name: TestData DB
+#     type: testdata
+#     database:
+#     ds_url:
+#     org_id: "1"
+#     user:
+#     password:
+#     time_interval:
+
+grafana_email_notification_channels:
+  - uid: 1
+    name: example alert
+    image: true
+    emails:
+      - you@yourdomain.fi
+
+grafana_dashboards:
+  - roles/ikke_t.grafana-podman/tests/test_datasource.json

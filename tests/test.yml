@@ -1,0 +1,62 @@
+---
+# yamllint disable rule:line-length
+
+- name: ensure grafana container is running and configured
+  hosts: all
+  vars:
+    container_run_as_user: grafana
+    nuke: false
+    container_dir_lib: grafana-lib
+    container_dir_etc: grafana-etc
+  tasks:
+
+    - name: include test vars
+      include_vars: roles/ikke_t.grafana-podman/tests/test_vars.yml
+
+    - name: set variable states when container state is running
+      set_fact:
+        state: present
+      when: container_state == "running"
+
+    - name: set variable states when container state is not running
+      set_fact:
+        state: absent
+      when: container_state != "running"
+
+    - name: ensure user before creating anything
+      user:
+        name: "{{ container_run_as_user }}"
+        comment: I run grafana container
+        state: "{{ state }}"
+      when: state == "present"
+
+    - name: import grafana role
+      tags: import
+      import_role:
+        name: ikke_t.grafana-podman
+      vars:
+        grafana_domain: grafana
+        grafana_root_url: "https://%(domain)s/"
+        grafana_public_url: "http://localhost:3000/"
+        grafana_smtp_enabled: false
+        grafana_smtp_host: smtp.yourdomain.com:25
+        grafana_smtp_from_address: you@yourdomain.com
+        container_memory: 128M
+        container_fqdn: "grafana.localdomain"
+
+    - name: clean up the user and data
+      block:
+        - name: nuke user
+          user:
+            name: "{{ container_run_as_user }}"
+            comment: I run grafana container
+            state: "{{ state }}"
+            force: true
+            remove: true
+        - name: nuke data
+          file:
+            path: /var/lib/grafana
+            state: "{{ state }}"
+      when:
+        - state == "absent"
+        - nuke|bool

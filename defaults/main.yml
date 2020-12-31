@@ -1,0 +1,49 @@
+---
+# defaults file for grafana
+# yamllint disable rule:line-length
+
+grafana_domain: localhost
+grafana_root_url: 'http://%(domain)s/'
+grafana_public_url: 'https://example.com/grafana'
+grafana_admin: admin
+grafana_admin_default_password: admin
+grafana_admin_password: "{{ grafana_admin_default_password }}"
+grafana_smtp_enabled: false
+grafana_smtp_host: smtp.example.com:25
+grafana_smtp_from_address: grafana@example.com
+grafana_smtp_from_name: Grafana
+grafana_admins:
+  - login: admin
+    name: 'The Admin'
+    email: 'admin@example.com'
+    password: "{{ grafana_admin_default_password }}"
+grafana_users: []
+grafana_dashboards: []
+grafana_datasources: []
+grafana_email_notification_channels: []
+
+container_state: running
+container_name: grafana
+container_run_as_user: grafana
+container_run_as_group: grafana
+container_image_list:
+  - grafana/grafana
+exported_container_volumes_basedir: /var/lib/grafana
+container_dir_lib: grafana-lib
+container_dir_etc: grafana-etc
+container_dir_owner: grafana
+container_dir_group: grafana
+container_fqdn: "grafana.localhost"
+container_run_args: >-
+  --rm
+  -p 3000:3000/tcp
+  -e "GF_INSTALL_PLUGINS=flant-statusmap-panel"
+  -v "{{ exported_container_volumes_basedir }}/{{ container_dir_etc }}/custom.ini:/etc/grafana/grafana.ini:Z"
+  -v "{{ exported_container_volumes_basedir }}/{{ container_dir_lib }}:/var/lib/grafana:Z"
+  --hostname="{{ container_fqdn }}"
+  --label "io.containers.autoupdate=image"
+container_firewall_ports:
+  - 3000/tcp
+
+  # --memory="{{ container_memory }}"
+

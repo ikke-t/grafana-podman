@@ -1,0 +1,69 @@
+---
+# yamllint disable rule:line-length
+
+- name: set variable states when container state is running
+  tags: facts
+  set_fact:
+    state: present
+  when: container_state == "running"
+
+- name: set variable states when container state is not running
+  tags: facts
+  set_fact:
+    state: absent
+  when: container_state != "running"
+
+- name: ensure container files mount point on host
+  tags: mount
+  file:
+    path: "{{ exported_container_volumes_basedir }}/{{ item }}"
+    owner: "{{ container_dir_owner }}"
+    group: "{{ container_dir_group }}"
+    state: directory
+    mode: "0770"
+    recurse: false
+  loop:
+    - "{{ container_dir_lib }}"
+    - "{{ container_dir_etc }}"
+
+- name: ensure grafana custom.ini
+  template:
+    src: custom.ini.j2
+    dest: "{{ exported_container_volumes_basedir }}/{{ container_dir_etc }}/custom.ini"
+    owner: "{{ container_run_as_user }}"
+    group: "{{ container_run_as_group }}"
+    mode: "0440"
+  when: state == "present"
+
+- name: ensure container state
+  tags: container
+  include_role:
+    name: ikke_t.podman_container_systemd
+
+- name: Wait for grafana container to come up
+  uri:
+    url: "{{ grafana_public_url }}"
+    status_code: 200
+  register: result
+  until: result.status == 200
+  retries: 90
+  delay: 1
+  when: container_state == "running"
+
+- name: ensure grafana runtime configuration is right
+  tags: push
+  include_tasks: push_configs.yml
+  vars:
+    # We do this by default locally from where the ansible playbook is run.
+    # I originally had here the HAproxy public url for grafana, but for
+    # some odd reason the grafana module failed via that, perhaps something
+    # to do with path mangling. If you have network problem preventing this
+    # you can also do it in target machine, comment out all but the last line,
+    # the grafana url. Also make sure you dashboards are available from container
+    # host machine.
+    ansible_connection: local
+    gather_facts: false
+    ansible_become: false
+    grafana_url: "http://{{ ansible_ssh_host }}:3000"
+    # grafana_url: "http://localhost:3000"
+  when: state == "present"

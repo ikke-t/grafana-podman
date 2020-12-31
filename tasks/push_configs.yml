@@ -1,0 +1,83 @@
+---
+
+# - name: Install/update Grafana plugins (no such module yet)
+#   grafana_plugin:
+#     name: "{{ item }}"
+#     version: latest
+#     state: present
+#   loop:
+#     - flant-statusmap-panel
+#     - grafana-influxdb-flux-datasource
+
+- name: Ensure admins
+  tags: push
+  community.grafana.grafana_user:
+    url: "{{ grafana_url }}"
+    url_username: "{{ grafana_admin }}"
+    url_password: "{{ grafana_admin_password }}"
+    name: "{{ item.name }}"
+    email: "{{ item.email }}"
+    login: "{{ item.login }}"
+    password: "{{ item.password }}"
+    is_admin: true
+    state: present
+  no_log: true
+  loop: "{{ grafana_admins }}"
+
+- name: Ensure users
+  tags: push
+  community.grafana.grafana_user:
+    grafana_url: "{{ grafana_url }}"
+    url_username: "{{ grafana_admin }}"
+    url_password: "{{ grafana_admin_password }}"
+    name: "{{ item.name }}"
+    email: "{{ item.email }}"
+    login: "{{ item.login }}"
+    password: "{{ item.password }}"
+    is_admin: false
+    state: present
+  no_log: true
+  loop: "{{ grafana_users }}"
+
+- name: Ensure datasources exist
+  tags: push
+  community.grafana.grafana_datasource:
+    url: "{{ grafana_url }}"
+    url_username: "{{ grafana_admin }}"
+    url_password: "{{ grafana_admin_password }}"
+    name: "{{ item.name }}"
+    ds_type: "{{ item.type }}"
+    database: "{{ item.database }}"
+    org_id: "{{ item.org_id }}"
+    ds_url: "{{ item.ds_url }}"
+    user: "{{ item.user }}"
+    password: "{{ item.password }}"
+    time_interval: "{{ item.time_interval }}"
+  no_log: true
+  loop: "{{ grafana_datasources }}"
+
+- name: Create email notification channels
+  tags: push
+  community.grafana.grafana_notification_channel:
+    grafana_url: "{{ grafana_url }}"
+    url_username: "{{ grafana_admin }}"
+    url_password: "{{ grafana_admin_password }}"
+    uid: "{{ item.uid }}"
+    name: "{{ item.name }}"
+    type: email
+    include_image: "{{ item.image }}"
+    webhook_http_method: 'POST'
+    email_addresses: "{{ item.emails }}"
+  loop: "{{ grafana_email_notification_channels }}"
+
+- name: Import Grafana dashboards
+  tags: push
+  community.grafana.grafana_dashboard:
+    commit_message: Updated by ansible
+    overwrite: true
+    path: "{{ item }}"
+    grafana_url: "{{ grafana_url }}"
+    url_username: "{{ grafana_admin }}"
+    url_password: "{{ grafana_admin_password }}"
+    org_id: "1"
+  loop: "{{ grafana_dashboards }}"
