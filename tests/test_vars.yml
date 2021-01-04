@@ -30,4 +30,4 @@ grafana_email_notification_channels:
       - you@yourdomain.fi
 
 grafana_dashboards:
-  - roles/ikke_t.grafana-podman/tests/test_datasource.json
+  - roles/ikke_t.grafana_podman/tests/test_datasource.json

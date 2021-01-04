@@ -11,7 +11,7 @@
   tasks:
 
     - name: include test vars
-      include_vars: roles/ikke_t.grafana-podman/tests/test_vars.yml
+      include_vars: roles/ikke_t.grafana_podman/tests/test_vars.yml
 
     - name: set variable states when container state is running
       set_fact:
@@ -33,7 +33,7 @@
     - name: import grafana role
       tags: import
       import_role:
-        name: ikke_t.grafana-podman
+        name: ikke_t.grafana_podman
       vars:
         grafana_domain: grafana
         grafana_root_url: "https://%(domain)s/"
