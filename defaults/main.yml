@@ -27,7 +27,7 @@ container_name: grafana
 container_run_as_user: grafana
 container_run_as_group: grafana
 container_image_list:
-  - grafana/grafana
+  - docker.io/grafana/grafana
 exported_container_volumes_basedir: /var/lib/grafana
 container_dir_lib: grafana-lib
 container_dir_etc: grafana-etc
